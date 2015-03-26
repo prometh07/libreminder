@@ -1,13 +1,14 @@
-class Crawler < Watir::Browser
-  def initialize user, password
+class HipCrawler < Watir::Browser
+  def initialize user, password, url, library
     super()
     @user = user
     @password = password
-    @library_name = 'PUT library'
+    @library_name = library
+    @url = url
   end
 
   def login
-    goto 'http://pp-hip.pfsl.poznan.pl/' 
+    goto @url
     a(title: 'Logowanie').click
     text_field(name: 'sec1').when_present.set @user
     text_field(name: 'sec2').set @password
