@@ -18,11 +18,12 @@ class Crawler < Watir::Browser
     a(text: 'Konto czytelnika').click
     a(text: 'Wypożyczenia').click
     a(text: 'Data zwrotu').click
-    tables(class: 'tableBackgroundHighlight')[1].rows[1..-1].reduce([]) do |books, row|
+    books = tables(class: 'tableBackgroundHighlight')[1].rows[1..-1].reduce([]) do |books, row|
       if (Date.parse(row.tds[-2].text) - Date.today).to_i < Helper::DUE_DATE 
         books << "#{row.tds[1].text.split("\n").first} - #{Date.parse(row.tds[-2].text)}"
       end
-    end.join("\n\n")
+    end
+    books.to_a.empty? ? "Nie ma żadnych książek do oddania w najbliższym czasie" : books.join("\n\n")
   end
 
   def run
