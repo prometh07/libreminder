@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'dotenv'
 require 'headless'
 require 'libnotify'
