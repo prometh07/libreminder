@@ -2,6 +2,7 @@
 require 'dotenv'
 require 'headless'
 require 'libnotify'
+require 'logger'
 require 'pry'
 require 'watir-webdriver'
 
@@ -10,6 +11,8 @@ require_relative 'helpers'
 
 Dotenv.load
 
+Helper::LOGGER.info "start"
+
 Headless.ly do
   crawlers = []
   crawlers << HipCrawler.new(ENV['PP_USER'], ENV['PP_PASSWORD'], 'http://pp-hip.pfsl.poznan.pl/', 'PUT')
@@ -17,3 +20,5 @@ Headless.ly do
 
   crawlers.each { |crawler| crawler.run }
 end
+
+Helper::LOGGER.info 'done'
