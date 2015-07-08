@@ -16,26 +16,26 @@ class HipCrawler < Watir::Browser
   end
 
   def books_info
-    a(text: 'Konto czytelnika').click
+    a(text: /konto czytelnika/i).when_present.click
     a(text: 'Wypożyczenia').when_present.click
     a(text: 'Data zwrotu').when_present.click
-    books = tables(class: 'tableBackgroundHighlight')[1].rows[1..-1].select do |row|
+    books = parse_books_table
+    books.to_a.empty? ? "Nie ma żadnych książek do oddania w najbliższym czasie" : books.join("\n\n")
+  end
+
+  def parse_books_table
+    tables(class: 'tableBackgroundHighlight')[1].rows[1..-1].select do |row|
       (Date.parse(row.tds[-2].text) - Date.today).to_i < Helper::DUE_DATE
     end.map { |row| "#{row.tds[1].text.split("\n").first} - #{Date.parse(row.tds[-2].text)}" }
-    books.to_a.empty? ? "Nie ma żadnych książek do oddania w najbliższym czasie" : books.join("\n\n")
   end
 
   def run
     login
-    Libnotify.show summary: @library_name,
-                   body: books_info,
-                   timeout: Helper::NOTIFY_TIMEOUT
+    Helper.show_notification(@library_name, books_info, Helper::NOTIFY_TIMEOUT)
     Helper::LOGGER.info "#{@library_name} - done"
   rescue => e
+    Helper.show_notification(@library_name, e.message, Helper::NOTIFY_TIMEOUT)
     Helper::LOGGER.error "#{@library_name} - #{e.message}"
-    Libnotify.show summary: @library_name,
-                   body: e.message,
-                   timeout: Helper::NOTIFY_TIMEOUT
   ensure
     close
   end
